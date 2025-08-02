@@ -2,12 +2,16 @@ import mongoose from "mongoose";
 
 const AssignmentSchema = new mongoose.Schema(
   {
-    title: String,
-    description: String,
-    deadline: Date,
-    instructorId: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+    title: { type: String, required: true },
+    description: { type: String, required: true },
+    deadline: { type: Date, required: true },
+    instructorId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
   },
-  { timestamps: true }
+  { timestamps: true } // important for sorting by createdAt
 );
 
 export default mongoose.models.Assignment ||
