@@ -7,6 +7,7 @@ export default function InstructorHome() {
   const { data: session } = useSession();
   const [assignments, setAssignments] = useState([]);
   const [submissions, setSubmissions] = useState([]);
+  const [studentCount, setStudentCount] = useState(0);
 
   useEffect(() => {
     fetch("/api/assignments")
@@ -15,6 +16,9 @@ export default function InstructorHome() {
     fetch("/api/submissions")
       .then((res) => res.json())
       .then(setSubmissions);
+    fetch("/api/students")
+      .then((res) => res.json())
+      .then((data) => setStudentCount(data.count));
   }, []);
 
   if (!session) return <p className="text-white">Loading...</p>;
@@ -33,7 +37,7 @@ export default function InstructorHome() {
       </div>
 
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
         <div className="bg-blue-500 p-4 rounded-lg shadow text-white">
           <h2 className="text-lg">Total Assignments</h2>
           <p className="text-3xl font-bold">{assignments.length}</p>
@@ -45,6 +49,10 @@ export default function InstructorHome() {
         <div className="bg-yellow-500 p-4 rounded-lg shadow text-white">
           <h2 className="text-lg">Pending Reviews</h2>
           <p className="text-3xl font-bold">{pendingCount}</p>
+        </div>
+        <div className="bg-purple-500 p-4 rounded-lg shadow text-white">
+          <h2 className="text-lg">Total Students</h2>
+          <p className="text-3xl font-bold">{studentCount}</p>
         </div>
       </div>
 
@@ -63,12 +71,6 @@ export default function InstructorHome() {
             className="bg-purple-600 hover:bg-purple-700 px-4 py-2 rounded"
           >
             📋 View All Assignments
-          </Link>
-          <Link
-            href="/dashboard/instructor"
-            className="bg-green-600 hover:bg-green-700 px-4 py-2 rounded"
-          >
-            📊 Review Submissions
           </Link>
         </div>
       </div>

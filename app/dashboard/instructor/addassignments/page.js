@@ -84,7 +84,7 @@ export default function InstructorAssignmentsPage() {
           <div key={a._id} className="bg-gray-700 p-4 rounded shadow mb-3">
             <h3 className="font-bold">{a.title}</h3>
             <p>{a.description}</p>
-            <p className="text-sm text-gray-500">
+            <p className="text-sm text-gray-400">
               Deadline: {new Date(a.deadline).toLocaleDateString()}
             </p>
           </div>
