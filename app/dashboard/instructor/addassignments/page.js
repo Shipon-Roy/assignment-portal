@@ -12,6 +12,7 @@ export default function InstructorAssignmentsPage() {
   });
   const [showModal, setShowModal] = useState(false);
   const [successMsg, setSuccessMsg] = useState("");
+  const [editId, setEditId] = useState(null); // store id if editing
 
   useEffect(() => {
     fetchAssignments();
@@ -30,16 +31,24 @@ export default function InstructorAssignmentsPage() {
     e.preventDefault();
     if (!session?.user?.id) return;
 
-    const res = await fetch("/api/assignments", {
-      method: "POST",
+    const method = editId ? "PUT" : "POST";
+    const url = editId ? `/api/assignments/${editId}` : "/api/assignments";
+
+    const res = await fetch(url, {
+      method,
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ ...form, instructorId: session.user.id }),
     });
 
     if (res.ok) {
       setForm({ title: "", description: "", deadline: "" });
+      setEditId(null);
       setShowModal(false);
-      setSuccessMsg("✅ Assignment created successfully!");
+      setSuccessMsg(
+        editId
+          ? "✏️ Assignment updated successfully!"
+          : "✅ Assignment created successfully!"
+      );
       fetchAssignments();
       setTimeout(() => setSuccessMsg(""), 3000);
     }
@@ -48,15 +57,23 @@ export default function InstructorAssignmentsPage() {
   const handleDelete = async (id) => {
     if (!confirm("Are you sure you want to delete this assignment?")) return;
 
-    const res = await fetch(`/api/assignments/${id}`, {
-      method: "DELETE",
-    });
+    const res = await fetch(`/api/assignments/${id}`, { method: "DELETE" });
 
     if (res.ok) {
       setSuccessMsg("🗑️ Assignment deleted successfully!");
       fetchAssignments();
       setTimeout(() => setSuccessMsg(""), 3000);
     }
+  };
+
+  const handleEdit = (assignment) => {
+    setForm({
+      title: assignment.title,
+      description: assignment.description,
+      deadline: assignment.deadline.split("T")[0], // format date for input
+    });
+    setEditId(assignment._id);
+    setShowModal(true);
   };
 
   if (!session || session.user.role !== "INSTRUCTOR") {
@@ -69,7 +86,11 @@ export default function InstructorAssignmentsPage() {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Manage Assignments</h1>
         <button
-          onClick={() => setShowModal(true)}
+          onClick={() => {
+            setForm({ title: "", description: "", deadline: "" });
+            setEditId(null);
+            setShowModal(true);
+          }}
           className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold transition"
         >
           ➕ Add Assignment
@@ -95,10 +116,10 @@ export default function InstructorAssignmentsPage() {
             </button>
 
             <h2 className="text-xl font-bold text-white mb-4">
-              Create New Assignment
+              {editId ? "Edit Assignment" : "Create New Assignment"}
             </h2>
 
-            <form onSubmit={handleSubmit} className="space-y-3">
+            <form onSubmit={handleSubmit} className="space-y-5 ">
               <input
                 name="title"
                 value={form.title}
@@ -112,7 +133,7 @@ export default function InstructorAssignmentsPage() {
                 value={form.description}
                 onChange={handleChange}
                 placeholder="Description"
-                className="w-full p-3 rounded-lg bg-gray-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="w-full h-60 p-3 rounded-lg bg-gray-800 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 rows="4"
                 required
               ></textarea>
@@ -128,7 +149,7 @@ export default function InstructorAssignmentsPage() {
                 type="submit"
                 className="w-full bg-green-600 hover:bg-green-700 text-white py-2 rounded-lg font-semibold transition duration-300"
               >
-                ✅ Create Assignment
+                {editId ? "✏️ Update Assignment" : "✅ Create Assignment"}
               </button>
             </form>
           </div>
@@ -156,12 +177,20 @@ export default function InstructorAssignmentsPage() {
                   </span>
                 </p>
               </div>
-              <button
-                onClick={() => handleDelete(a._id)}
-                className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-lg font-semibold transition"
-              >
-                🗑
-              </button>
+              <div className="flex gap-2">
+                <button
+                  onClick={() => handleEdit(a)}
+                  className="bg-gray-500 hover:bg-gray-600 text-white px-3 py-1 rounded-lg font-semibold transition"
+                >
+                  📝
+                </button>
+                <button
+                  onClick={() => handleDelete(a._id)}
+                  className="bg-red-600 hover:bg-red-700 text-white px-3 py-1 rounded-lg font-semibold transition"
+                >
+                  🗑
+                </button>
+              </div>
             </div>
           ))}
         </div>

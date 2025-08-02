@@ -35,6 +35,9 @@ export default function StudentHome() {
         </h1>
         <p className="text-gray-400">Role: {session.user.role}</p>
         <p className="text-gray-400">Email: {session.user.email}</p>
+        <p className="text-gray-400">
+          Student ID: <span className="font-mono">{session.user.id}</span>
+        </p>
       </div>
 
       {/* Stats Cards */}
